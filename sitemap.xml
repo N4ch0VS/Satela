@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="www.sitemaps.org">
-  <url>
-    <loc>satela.qzz.io</loc>
-    <lastmod>2024-01-01</lastmod>
-  </url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<url>
+<loc>https://satela.qzz.io/</loc>
+<lastmod>2026-01-14T23:26:32+00:00</lastmod>
+</url>
 </urlset>
