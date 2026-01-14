@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satela - Cansat </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="side-triangle left-triangle"></div>
+    <div class="side-triangle right-triangle"></div>
+
+    <header class="navbar" id="mainNavbar">
+        <div class="logo-area">
+            <div class="img-placeholder">
+                <img src="https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png" alt="Logo"> /*Logo*/
+            </div>
+            <span class="brand-name">Satela</span>
+        </div>
+       
+        <nav>
+            <a href="#" class="nav-link active" onclick="switchTab('datos', event)">DATOS</a>
+            <a href="#" class="nav-link" onclick="switchTab('cansat', event)">CANSAT</a>
+            <a href="javascript:void(0)" class="nav-link theme-btn" onclick="toggleTheme(event)">TEMA</a>
+        </nav> </header>
+
+    <div class="main-wrapper">
+        
+        <main id="view-datos" class="tab-content">
+            <h1 class="main-title">CANSAT DATOS</h1>
+           
+            <div class="grid-layout">
+                <div class="column">
+                    <div class="widget" onclick="openChartModal('altitud')" style="cursor: pointer;">
+                        <div class="widget-header">
+                            <span>ALTITUD (m)</span>
+                            <span id="dato-altitud" style="font-size: 0.8rem; color: #666;">-- m</span>
+                        </div>
+                        <div class="iframe-container small-h" style="position: relative; height: 100px;">
+                            <canvas id="chartAltitud"></canvas>
+                        </div>
+                        <div style="text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 5px;">Ver mas</div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header"><span>TEMPERATURA (°C)</span></div>
+                        <div class="data-row">
+                            <span id="dato-temp" class="sensor-value">-- °C</span>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-header"><span>PRESIÓN (hPa)</span></div>
+                        <div class="data-row">
+                            <span id="dato-presion" class="sensor-value">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="column-center">
+                    <div class="widget video-widget">
+                        <div class="widget-header"><span>Video</span></div>
+                        <div class="video-frame">
+                            <iframe src="" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <div class="widget-header"><span>Estado:</span></div>
+                     <div class="estado">
+                         <span id="Estado" class="Estado">Desconectado</span>
+                     </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="widget">
+                        <div class="widget-header"><span>HUMEDAD (%)</span></div>
+                        <div class="data-row">
+                            <span id="dato-humedad" class="sensor-value">-- %</span>
+                        </div>
+                    </div>
+                    
+                    <div class="widget">
+                        <div class="widget-header"><span>GPS CORDENADAS</span></div>
+                        <div class="gps-box">
+                            <div class="coords-text">
+                                <p>No disponible</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="widget" onclick="openChartModal('velocidad')" style="cursor: pointer;">
+                            <div class="widget-header">
+                                <span>VELOCIDAD (m/s)</span>
+                                <span id="dato-velocidad" style="font-size: 0.8rem; color: #666;">--</span>
+                            </div>
+                            <div class="iframe-container small-h" style="position: relative; height: 100px;">
+                                <canvas id="chartVelocidad"></canvas>
+                            </div>
+                            <div style="text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 5px;">Ver mas</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <main id="view-cansat" class="tab-content" style="display: none;">
+            <div class="section-hero">
+                <div class="hero-overlay">
+                    <h2>EQUIPO CANSAT</h2>
+                    <p>Somos un equipo que nos apasiona encontrar soluciones a todo tipo de problema e inovar </p>
+                </div>
+            </div>
+            <div class="team-grid" id="team-container"></div>
+        </main>
+          
+        <footer class="footer">
+            <div class="email-contact">info@satela.com</div>
+            <div class="footer-logo">Satela</div>
+        </footer>
+    </div>
+
+    <div class="popup-overlay" id="popupBg">
+        <div class="popup-card">
+            <button class="close-btn" onclick="closePopup()">×</button>
+            <div class="popup-banner" id="popupBanner"></div>
+            <div class="popup-content-wrapper">
+                <div class="popup-img-container">
+                    <img id="popupImg" src="" alt="Foto Alumno">
+                </div>
+                <h2 id="popupTitle">Nombre</h2>
+                <p id="popupText" class="popup-desc"></p>
+                <div class="popup-contact">
+                    <span class="label">CONTACTO</span>
+                    <a id="popupEmail" href="#" class="email-link"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="chart-modal-overlay" id="chartModalBg">
+      <div class="chart-modal-card">
+         <button class="close-chart-btn" onclick="closeChartModal()">×</button>
+         <h2 id="chartModalTitle">TELEMETRÍA</h2>
+          <div class="large-chart-box">
+             <canvas id="bigChartAltitud"></canvas>
+             <canvas id="bigChartVelocidad"></canvas>
+         </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="script.js"></script>
+    <!--el primer y segundo scripts son las librerias que hacen que reciba datos por mqtt y generar graficos,  despues el tercer script
+    es para ponerlos en los widgets y botones, van en ese orden por que si se invierten la libreria no carga -->
+</body>
+</html>
