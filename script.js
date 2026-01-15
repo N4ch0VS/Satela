@@ -1,7 +1,7 @@
 // ==========================================
-// 1. GESTIÓN DE MEMORIA (Datos Persistentes)
+// 1. GESTIÓN DE MEMORIA (Solo Telemetría)
 // ==========================================
-// NOTA: No guardamos 'estado' aquí para que sea un indicador en tiempo real.
+// Limpiamos cualquier "estado" que haya quedado guardado por error antes
 let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     altitud: Array(15).fill(null),
     velocidad: Array(15).fill(null),
@@ -10,36 +10,67 @@ let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     humedad: "--"
 };
 
+// Asegurarnos de que NO existe propiedad de estado en la memoria
+if (logData.estado) {
+    delete logData.estado;
+    localStorage.setItem('satela_registry', JSON.stringify(logData));
+}
+
 function guardarEnMemoria() {
+    // Solo guardamos números, nunca el estado de conexión
     localStorage.setItem('satela_registry', JSON.stringify(logData));
 }
 
 // ==========================================
-// 2. DATOS DEL EQUIPO (Tarjetas de Contacto)
+// 2. SISTEMA DE NOTIFICACIONES (NUEVO)
+// ==========================================
+function showToast(message, type) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    // Crear elemento
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Icono según tipo
+    const icon = type === 'success' ? '✔' : '✖';
+    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+
+    // Agregar al HTML
+    container.appendChild(toast);
+
+    // Eliminar del DOM después de que termine la animación (3.5s)
+    setTimeout(() => {
+        toast.remove();
+    }, 3500);
+}
+
+// ==========================================
+// 3. DATOS DEL EQUIPO
 // ==========================================
 const teamMembers = [
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Sofia.jpg", 
         title: "Sofía Rojas", 
-        text: "Especialista en comunicaciones y telemetría.", 
+        text: "", 
         email: "sg.rojas@alumno.etec.um.edu.ar",
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Nacho.jpg", 
         title: "Juan Ignacio Calderón", 
-        text: "Encargado del diseño estructural del CanSat.", 
+        text: "", 
         email: "jil.calderon@alumno.etec.um.edu.ar" 
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png", 
         title: "Gastón García", 
-        text: "Desarrollador de software y sistemas embebidos.", 
+        text: "", 
         email: "gal.garcia@alumno.etec.um.edu.ar" 
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Santy.jpg", 
         title: "Santiago Juárez", 
-        text: "Analista de datos y control de misión.", 
+        text: "", 
         email: "sc.juarez@alumno.etec.um.edu.ar" 
     },
     { 
@@ -50,42 +81,33 @@ const teamMembers = [
     }
 ];
 
-// Generar las tarjetas en el HTML automáticamente
 const container = document.getElementById("team-container");
 if(container) {
     teamMembers.forEach((member, index) => {
         const card = document.createElement("div");
         card.classList.add("team-card");
         const imgUrl = member.img || 'tu-logo.png'; 
-
         card.innerHTML = `
             <img src="${imgUrl}" alt="${member.title}" onerror="this.src='tu-logo.png'">
             <h3>${member.title}</h3>
         `;
-        // Al hacer click, abrimos el popup
         card.onclick = () => openPopup(index);
         container.appendChild(card);
     });
 }
 
 // ==========================================
-// 3. INTERFAZ DE USUARIO (Menú, Popups, Tema)
+// 4. INTERFAZ Y NAVEGACIÓN
 // ==========================================
-
-// Cambiar entre pestaña DATOS y CANSAT
 function switchTab(tabName, event) {
     if(event) event.preventDefault();
-    
-    // Mostrar/Ocultar secciones
     document.getElementById('view-datos').style.display = tabName === 'datos' ? 'block' : 'none';
     document.getElementById('view-cansat').style.display = tabName === 'cansat' ? 'block' : 'none';
     
-    // Actualizar clase 'active' en el menú
     const links = document.querySelectorAll('.nav-link');
     links.forEach(link => link.classList.remove('active'));
     if(event) event.target.classList.add('active');
 
-    // Cambiar color de la barra de navegación (Azul en Cansat)
     const navbar = document.getElementById('mainNavbar');
     if (tabName === 'cansat') {
         navbar.classList.add('navy-nav');
@@ -94,7 +116,7 @@ function switchTab(tabName, event) {
     }
 }
 
-// Lógica del Popup de Alumnos
+// Popup
 const popupBg = document.getElementById("popupBg");
 const popupImg = document.getElementById("popupImg");
 const popupTitle = document.getElementById("popupTitle");
@@ -110,7 +132,6 @@ function openPopup(index) {
     popupEmail.textContent = member.email;
     popupEmail.href = "mailto:" + member.email;
     
-    // Fondo del banner (imagen o gradiente)
     if (member.banner) {
         popupBanner.style.backgroundImage = `url(${member.banner})`;
     } else {
@@ -118,17 +139,8 @@ function openPopup(index) {
     }
     popupBg.style.display = "flex";
 }
-
-function closePopup() {
-    popupBg.style.display = "none";
-}
-
-// Cerrar al hacer click fuera de la tarjeta
-if(popupBg) {
-    popupBg.onclick = (e) => { 
-        if (e.target === popupBg) closePopup(); 
-    };
-}
+function closePopup() { if(popupBg) popupBg.style.display = "none"; }
+if(popupBg) popupBg.onclick = (e) => { if (e.target === popupBg) closePopup(); };
 
 // Modo Oscuro
 function toggleTheme(event) {
@@ -137,22 +149,19 @@ function toggleTheme(event) {
         event.stopPropagation();
     }
     document.body.classList.toggle('dark-mode');
-    
-    // Guardar preferencia
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('dark-theme', isDark);
 }
 
 // ==========================================
-// 4. CONFIGURACIÓN DE GRÁFICOS (Chart.js)
+// 5. GRÁFICOS (Chart.js)
 // ==========================================
-
 const chartConfig = {
     type: 'line',
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: false, // Desactivar animación para rendimiento en tiempo real
+        animation: false, 
         plugins: { legend: { display: false } },
         scales: {
             x: { display: false },
@@ -162,26 +171,22 @@ const chartConfig = {
             }
         },
         elements: {
-            line: { tension: 0, borderWidth: 2 }, // Líneas rectas (puntos conectados)
+            line: { tension: 0, borderWidth: 2 },
             point: { radius: 3, hoverRadius: 5, backgroundColor: '#fff' }
         }
     }
 };
 
-let chartAltitud, chartVelocidad;
-let bigChartAltitud, bigChartVelocidad;
+let chartAltitud, chartVelocidad, bigChartAltitud, bigChartVelocidad;
 
-// --- Inicializar Gráficos Pequeños (Widgets) ---
-// Usamos los datos guardados en 'logData' para que no aparezcan vacíos
-
+// Gráficos Pequeños
 if(document.getElementById('chartAltitud')) {
-    const ctxAlt = document.getElementById('chartAltitud').getContext('2d');
-    chartAltitud = new Chart(ctxAlt, {
+    chartAltitud = new Chart(document.getElementById('chartAltitud').getContext('2d'), {
         ...chartConfig,
         data: {
             labels: Array(15).fill(''),
             datasets: [{
-                data: [...logData.altitud], // Cargar historial
+                data: [...logData.altitud],
                 borderColor: '#007bff',
                 pointBackgroundColor: '#007bff',
                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
@@ -192,13 +197,12 @@ if(document.getElementById('chartAltitud')) {
 }
 
 if(document.getElementById('chartVelocidad')) {
-    const ctxVel = document.getElementById('chartVelocidad').getContext('2d');
-    chartVelocidad = new Chart(ctxVel, {
+    chartVelocidad = new Chart(document.getElementById('chartVelocidad').getContext('2d'), {
         ...chartConfig,
         data: {
             labels: Array(15).fill(''),
             datasets: [{
-                data: [...logData.velocidad], // Cargar historial
+                data: [...logData.velocidad],
                 borderColor: '#ff9800',
                 pointBackgroundColor: '#ff9800',
                 backgroundColor: 'rgba(255, 152, 0, 0.1)',
@@ -208,14 +212,13 @@ if(document.getElementById('chartVelocidad')) {
     });
 }
 
-// --- Inicializar Gráficos Grandes (Modal) ---
+// Gráficos Grandes
 const bigChartConfig = JSON.parse(JSON.stringify(chartConfig)); 
-bigChartConfig.options.scales.x.display = true; // Mostrar eje X en los grandes
+bigChartConfig.options.scales.x.display = true; 
 bigChartConfig.options.scales.y.grid.color = 'rgba(100, 100, 100, 0.2)';
 
 if(document.getElementById('bigChartAltitud')) {
-    const ctxBigAlt = document.getElementById('bigChartAltitud').getContext('2d');
-    bigChartAltitud = new Chart(ctxBigAlt, {
+    bigChartAltitud = new Chart(document.getElementById('bigChartAltitud').getContext('2d'), {
         ...bigChartConfig,
         data: {
             labels: Array(15).fill(''),
@@ -232,8 +235,7 @@ if(document.getElementById('bigChartAltitud')) {
 }
 
 if(document.getElementById('bigChartVelocidad')) {
-    const ctxBigVel = document.getElementById('bigChartVelocidad').getContext('2d');
-    bigChartVelocidad = new Chart(ctxBigVel, {
+    bigChartVelocidad = new Chart(document.getElementById('bigChartVelocidad').getContext('2d'), {
         ...bigChartConfig,
         data: {
             labels: Array(15).fill(''),
@@ -249,7 +251,7 @@ if(document.getElementById('bigChartVelocidad')) {
     });
 }
 
-// --- Lógica del Modal de Gráficos ---
+// Modal Gráficos
 const chartModalBg = document.getElementById('chartModalBg');
 const canvasBigAlt = document.getElementById('bigChartAltitud');
 const canvasBigVel = document.getElementById('bigChartVelocidad');
@@ -258,8 +260,6 @@ const chartModalTitle = document.getElementById('chartModalTitle');
 function openChartModal(type) {
     if(!chartModalBg) return;
     chartModalBg.style.display = 'flex';
-    
-    // Mostrar solo el gráfico correspondiente
     if (type === 'altitud') {
         if(chartModalTitle) chartModalTitle.innerText = "HISTORIAL DE ALTITUD EN TIEMPO REAL";
         if(canvasBigAlt) canvasBigAlt.style.display = 'block';
@@ -270,162 +270,162 @@ function openChartModal(type) {
         if(canvasBigVel) canvasBigVel.style.display = 'block';
     }
 }
+function closeChartModal() { if(chartModalBg) chartModalBg.style.display = 'none'; }
+if(chartModalBg) chartModalBg.onclick = (e) => { if(e.target === chartModalBg) closeChartModal(); }
 
-function closeChartModal() {
-    if(chartModalBg) chartModalBg.style.display = 'none';
-}
-
-if(chartModalBg) {
-    chartModalBg.onclick = function(e) {
-        if(e.target === chartModalBg) closeChartModal();
-    }
-}
-
-// Función auxiliar para actualizar gráficos en tiempo real
 function updateChart(chart, value) {
     if(!chart) return;
     const data = chart.data.datasets[0].data;
     const labels = chart.data.labels;
-
-    // Desplazar datos (FIFO)
     data.shift();
     data.push(value);
     labels.shift();
     labels.push('');
-    
     chart.update();
 }
 
+// ==========================================
+// 6. CARGA INICIAL (OnLoad)
+// ==========================================
+const estadoWidget = document.getElementById('widget-estado');
+const estadoText = document.getElementById('Estado');
 
-// ==========================================
-// 5. CARGA INICIAL (Al abrir la página)
-// ==========================================
+// Función que fuerza el estado visual
+function setConnectionStatus(isConnected) {
+    if(!estadoWidget) return;
+    
+    if (isConnected) {
+        // Conectado: Verde
+        estadoWidget.classList.add('connected');
+        estadoWidget.classList.remove('disconnected');
+    } else {
+        // Desconectado: Rojo
+        estadoWidget.classList.add('disconnected');
+        estadoWidget.classList.remove('connected');
+        
+        // OPCIONAL: Si quieres que el texto cambie automáticamente a "Desconectado" 
+        // cuando se pierde la señal, descomenta la siguiente línea:
+        if(estadoText) estadoText.innerText = "Desconectado";
+    }
+}
+
 window.onload = () => {
-    // 1. Cargar Tema (Oscuro/Claro)
+    // 1. Cargar Tema
     if (localStorage.getItem('dark-theme') === 'true') {
         document.body.classList.add('dark-mode');
     }
 
-    // 2. Cargar últimos valores de Sensores desde Memoria
+    // 2. Cargar Textos de Memoria
     if(document.getElementById('dato-temp')) document.getElementById('dato-temp').innerText = logData.temp + " °C";
     if(document.getElementById('dato-presion')) document.getElementById('dato-presion').innerText = logData.presion;
     if(document.getElementById('dato-humedad')) document.getElementById('dato-humedad').innerText = logData.humedad + " %";
     
-    // 3. Cargar últimos valores de Gráficos en el texto
+    // 3. Cargar Gráficos en Texto
     const lastAlt = logData.altitud[14]; 
     const lastVel = logData.velocidad[14];
     
     if(document.getElementById('dato-altitud')) document.getElementById('dato-altitud').innerText = (lastAlt !== null ? lastAlt : "--") + " m";
     if(document.getElementById('dato-velocidad')) document.getElementById('dato-velocidad').innerText = (lastVel !== null ? lastVel : "--");
-    
-    // IMPORTANTE: Inicializamos el estado en "Desconectado" (Luz Roja)
-    // No cargamos el texto de misión guardado para evitar confusión.
-    setConnectionStatus(false);
+
+    // 4. FORZAR ESTADO DESCONECTADO AL INICIAR
+    // Esto asegura que nunca aparezca verde al recargar si no hay conexión real.
+    setConnectionStatus(false); 
 };
 
-
 // ==========================================
-// 6. LÓGICA DE CONEXIÓN Y MQTT
+// 7. MQTT Y CONEXIÓN
 // ==========================================
-
-const estadoWidget = document.getElementById('widget-estado');
-const estadoText = document.getElementById('Estado');
-
-// Función visual: Controla el LED (Borde y Punto)
-// NO cambia el texto de la misión, solo el indicador de conexión.
-function setConnectionStatus(isConnected) {
-    if(!estadoWidget) return;
-
-    if (isConnected) {
-        estadoWidget.classList.add('connected');
-        estadoWidget.classList.remove('disconnected');
-    } else {
-        estadoWidget.classList.add('disconnected');
-        estadoWidget.classList.remove('connected');
-    }
-}
-
-// Conexión al Broker
 const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
-console.log("Conectando a hivemq..."); 
+console.log("Iniciando conexión MQTT..."); 
+
 const client = mqtt.connect(brokerUrl);
 
-// Evento: Conectado (Luz Verde)
+// --- EVENTOS DE CONEXIÓN ---
+
 client.on('connect', () => {
     console.log(">> Conectado a HiveMQ");
-    setConnectionStatus(true); 
+    
+    // 1. Cambiar LED a Verde
+    setConnectionStatus(true);
+    
+    // 2. Mostrar Notificación Verde
+    showToast("Conectado al Servidor", "success");
+
     client.subscribe('satela/#');
 });
 
-// Evento: Desconectado (Luz Roja)
 client.on('offline', () => {
     console.log(">> Offline");
-    setConnectionStatus(false); 
-});
-
-client.on('close', () => {
+    
+    // 1. Cambiar LED a Rojo
     setConnectionStatus(false);
+    
+    // 2. Mostrar Notificación Roja
+    showToast("Conexión Perdida", "error");
 });
 
-// Evento: Mensaje Recibido
+client.on('error', (err) => {
+    console.error("Error MQTT:", err);
+    setConnectionStatus(false);
+    showToast("Error de Conexión", "error");
+});
+
+// --- RECEPCIÓN DE MENSAJES ---
+
 client.on('message', (topic, message) => {
     const valorStr = message.toString();
     const valorNum = parseFloat(valorStr);
 
-    // --- ALTITUD ---
+    // ALTITUD
     if (topic === 'satela/altitud') {
         document.getElementById('dato-altitud').innerText = valorStr + " m";
         if(!isNaN(valorNum)) {
-            // Guardar en memoria y actualizar gráficos
             logData.altitud.push(valorNum);
             if(logData.altitud.length > 15) logData.altitud.shift(); 
             guardarEnMemoria();
-            
             updateChart(chartAltitud, valorNum);
             updateChart(bigChartAltitud, valorNum);
         }
     }
 
-    // --- TEMPERATURA ---
+    // TEMPERATURA
     if (topic === 'satela/temp') {
         logData.temp = valorStr;
         guardarEnMemoria();
-        
         const el = document.getElementById('dato-temp');
         if(el) {
             el.innerText = valorStr + " °C";
-            // Alerta visual simple si supera 40 grados
             el.style.color = valorNum > 40 ? '#ff4444' : ''; 
         }
     }
 
-    // --- PRESIÓN ---
+    // PRESIÓN
     if (topic === 'satela/presion') {
         logData.presion = valorStr;
         guardarEnMemoria();
         document.getElementById('dato-presion').innerText = valorStr;
     }
 
-    // --- HUMEDAD ---
+    // HUMEDAD
     if (topic === 'satela/humedad') {
         logData.humedad = valorStr;
         guardarEnMemoria();
         document.getElementById('dato-humedad').innerText = valorStr + " %";
     }
 
-    // --- ESTADO DE MISIÓN (Texto) ---
+    // ESTADO DE MISIÓN (Texto)
     if (topic === 'satela/estado') {
+        // Solo actualizamos el texto visualmente. NO GUARDAMOS NADA.
         if(estadoText) estadoText.innerText = valorStr;
     }
 
-    // --- VELOCIDAD ---
+    // VELOCIDAD
     if (topic === 'satela/velocidad') {
         document.getElementById('dato-velocidad').innerText = valorStr;
         if(!isNaN(valorNum)) {
             logData.velocidad.push(valorNum);
             if(logData.velocidad.length > 15) logData.velocidad.shift();
             guardarEnMemoria();
-            
             updateChart(chartVelocidad, valorNum);
             updateChart(bigChartVelocidad, valorNum);
         }
