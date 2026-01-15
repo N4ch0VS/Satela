@@ -1,7 +1,7 @@
 // ==========================================
 // 1. GESTIÓN DE MEMORIA (Solo Telemetría)
 // ==========================================
-// Limpiamos cualquier "estado" que haya quedado guardado por error antes
+// Borramos cualquier rastro de "estado" para evitar datos viejos
 let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     altitud: Array(15).fill(null),
     velocidad: Array(15).fill(null),
@@ -10,39 +10,36 @@ let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     humedad: "--"
 };
 
-// Asegurarnos de que NO existe propiedad de estado en la memoria
+// Limpieza de seguridad: Si por error se guardó el estado, lo borramos.
 if (logData.estado) {
     delete logData.estado;
     localStorage.setItem('satela_registry', JSON.stringify(logData));
 }
 
 function guardarEnMemoria() {
-    // Solo guardamos números, nunca el estado de conexión
     localStorage.setItem('satela_registry', JSON.stringify(logData));
 }
 
 // ==========================================
-// 2. SISTEMA DE NOTIFICACIONES (NUEVO)
+// 2. SISTEMA DE NOTIFICACIONES (TOAST)
 // ==========================================
 function showToast(message, type) {
     const container = document.getElementById('toastContainer');
-    if (!container) return;
+    if (!container) return; // Si no existe el contenedor en HTML, no hace nada
 
-    // Crear elemento
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = `toast ${type}`; // 'success' (verde) o 'error' (rojo)
     
-    // Icono según tipo
     const icon = type === 'success' ? '✔' : '✖';
     toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
 
-    // Agregar al HTML
     container.appendChild(toast);
 
-    // Eliminar del DOM después de que termine la animación (3.5s)
+    // Desaparecer automáticamente a los 4 segundos
     setTimeout(() => {
-        toast.remove();
-    }, 3500);
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+    }, 4000);
 }
 
 // ==========================================
@@ -52,25 +49,25 @@ const teamMembers = [
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Sofia.jpg", 
         title: "Sofía Rojas", 
-        text: "", 
+        text: "Especialista en comunicaciones y telemetría.", 
         email: "sg.rojas@alumno.etec.um.edu.ar",
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Nacho.jpg", 
         title: "Juan Ignacio Calderón", 
-        text: "", 
+        text: "Encargado del diseño estructural del CanSat.", 
         email: "jil.calderon@alumno.etec.um.edu.ar" 
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png", 
         title: "Gastón García", 
-        text: "", 
+        text: "Desarrollador de software y sistemas embebidos.", 
         email: "gal.garcia@alumno.etec.um.edu.ar" 
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Santy.jpg", 
         title: "Santiago Juárez", 
-        text: "", 
+        text: "Analista de datos y control de misión.", 
         email: "sc.juarez@alumno.etec.um.edu.ar" 
     },
     { 
@@ -97,7 +94,7 @@ if(container) {
 }
 
 // ==========================================
-// 4. INTERFAZ Y NAVEGACIÓN
+// 4. INTERFAZ (Tabs, Popups, Tema)
 // ==========================================
 function switchTab(tabName, event) {
     if(event) event.preventDefault();
@@ -116,7 +113,6 @@ function switchTab(tabName, event) {
     }
 }
 
-// Popup
 const popupBg = document.getElementById("popupBg");
 const popupImg = document.getElementById("popupImg");
 const popupTitle = document.getElementById("popupTitle");
@@ -131,7 +127,6 @@ function openPopup(index) {
     popupText.textContent = member.text;
     popupEmail.textContent = member.email;
     popupEmail.href = "mailto:" + member.email;
-    
     if (member.banner) {
         popupBanner.style.backgroundImage = `url(${member.banner})`;
     } else {
@@ -142,19 +137,15 @@ function openPopup(index) {
 function closePopup() { if(popupBg) popupBg.style.display = "none"; }
 if(popupBg) popupBg.onclick = (e) => { if (e.target === popupBg) closePopup(); };
 
-// Modo Oscuro
 function toggleTheme(event) {
-    if(event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
+    if(event) { event.preventDefault(); event.stopPropagation(); }
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('dark-theme', isDark);
 }
 
 // ==========================================
-// 5. GRÁFICOS (Chart.js)
+// 5. GRÁFICOS
 // ==========================================
 const chartConfig = {
     type: 'line',
@@ -179,7 +170,6 @@ const chartConfig = {
 
 let chartAltitud, chartVelocidad, bigChartAltitud, bigChartVelocidad;
 
-// Gráficos Pequeños
 if(document.getElementById('chartAltitud')) {
     chartAltitud = new Chart(document.getElementById('chartAltitud').getContext('2d'), {
         ...chartConfig,
@@ -195,7 +185,6 @@ if(document.getElementById('chartAltitud')) {
         }
     });
 }
-
 if(document.getElementById('chartVelocidad')) {
     chartVelocidad = new Chart(document.getElementById('chartVelocidad').getContext('2d'), {
         ...chartConfig,
@@ -212,7 +201,7 @@ if(document.getElementById('chartVelocidad')) {
     });
 }
 
-// Gráficos Grandes
+// Gráficos Modal
 const bigChartConfig = JSON.parse(JSON.stringify(chartConfig)); 
 bigChartConfig.options.scales.x.display = true; 
 bigChartConfig.options.scales.y.grid.color = 'rgba(100, 100, 100, 0.2)';
@@ -233,7 +222,6 @@ if(document.getElementById('bigChartAltitud')) {
         }
     });
 }
-
 if(document.getElementById('bigChartVelocidad')) {
     bigChartVelocidad = new Chart(document.getElementById('bigChartVelocidad').getContext('2d'), {
         ...bigChartConfig,
@@ -251,7 +239,7 @@ if(document.getElementById('bigChartVelocidad')) {
     });
 }
 
-// Modal Gráficos
+// Control Modal
 const chartModalBg = document.getElementById('chartModalBg');
 const canvasBigAlt = document.getElementById('bigChartAltitud');
 const canvasBigVel = document.getElementById('bigChartVelocidad');
@@ -284,94 +272,90 @@ function updateChart(chart, value) {
     chart.update();
 }
 
+
 // ==========================================
-// 6. CARGA INICIAL (OnLoad)
+// 6. CARGA INICIAL
 // ==========================================
 const estadoWidget = document.getElementById('widget-estado');
 const estadoText = document.getElementById('Estado');
 
-// Función que fuerza el estado visual
+// Control Visual del Estado (LED + Texto)
 function setConnectionStatus(isConnected) {
-    if(!estadoWidget) return;
-    
+    if(!estadoWidget || !estadoText) return;
+
     if (isConnected) {
-        // Conectado: Verde
+        // Lógica de seguridad: Solo ponemos verde si el texto NO dice "Desconectado"
+        // O forzamos el texto a "Conectado" para que coincida.
         estadoWidget.classList.add('connected');
         estadoWidget.classList.remove('disconnected');
+        
+        // Si decía "Desconectado", lo cambiamos para que no haya contradicción
+        if (estadoText.innerText === "Desconectado") {
+            estadoText.innerText = "Conectado";
+        }
     } else {
-        // Desconectado: Rojo
+        // Si se corta, ponemos Rojo Y cambiamos el texto
         estadoWidget.classList.add('disconnected');
         estadoWidget.classList.remove('connected');
-        
-        // OPCIONAL: Si quieres que el texto cambie automáticamente a "Desconectado" 
-        // cuando se pierde la señal, descomenta la siguiente línea:
-        if(estadoText) estadoText.innerText = "Desconectado";
+        estadoText.innerText = "Desconectado";
     }
 }
 
 window.onload = () => {
-    // 1. Cargar Tema
-    if (localStorage.getItem('dark-theme') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
-
-    // 2. Cargar Textos de Memoria
+    if (localStorage.getItem('dark-theme') === 'true') document.body.classList.add('dark-mode');
+    
+    // Cargar datos
     if(document.getElementById('dato-temp')) document.getElementById('dato-temp').innerText = logData.temp + " °C";
     if(document.getElementById('dato-presion')) document.getElementById('dato-presion').innerText = logData.presion;
     if(document.getElementById('dato-humedad')) document.getElementById('dato-humedad').innerText = logData.humedad + " %";
     
-    // 3. Cargar Gráficos en Texto
     const lastAlt = logData.altitud[14]; 
     const lastVel = logData.velocidad[14];
-    
     if(document.getElementById('dato-altitud')) document.getElementById('dato-altitud').innerText = (lastAlt !== null ? lastAlt : "--") + " m";
     if(document.getElementById('dato-velocidad')) document.getElementById('dato-velocidad').innerText = (lastVel !== null ? lastVel : "--");
 
-    // 4. FORZAR ESTADO DESCONECTADO AL INICIAR
-    // Esto asegura que nunca aparezca verde al recargar si no hay conexión real.
-    setConnectionStatus(false); 
+    // AL INICIAR: Siempre empezamos en Rojo / Desconectado
+    setConnectionStatus(false);
 };
 
+
 // ==========================================
-// 7. MQTT Y CONEXIÓN
+// 7. MQTT (LÓGICA BLINDADA)
 // ==========================================
 const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
 console.log("Iniciando conexión MQTT..."); 
 
 const client = mqtt.connect(brokerUrl);
 
-// --- EVENTOS DE CONEXIÓN ---
-
+// --- CONEXIÓN ESTABLECIDA ---
 client.on('connect', () => {
     console.log(">> Conectado a HiveMQ");
     
-    // 1. Cambiar LED a Verde
+    // 1. Ponemos LED Verde
     setConnectionStatus(true);
-    
-    // 2. Mostrar Notificación Verde
-    showToast("Conectado al Servidor", "success");
+    // 2. Notificación
+    showToast("Conexión Establecida", "success");
 
     client.subscribe('satela/#');
 });
 
+// --- CONEXIÓN PERDIDA ---
 client.on('offline', () => {
     console.log(">> Offline");
     
-    // 1. Cambiar LED a Rojo
+    // 1. Ponemos LED Rojo Y Texto "Desconectado"
     setConnectionStatus(false);
-    
-    // 2. Mostrar Notificación Roja
+    // 2. Notificación
     showToast("Conexión Perdida", "error");
 });
 
 client.on('error', (err) => {
-    console.error("Error MQTT:", err);
+    console.error("Error:", err);
     setConnectionStatus(false);
     showToast("Error de Conexión", "error");
 });
 
-// --- RECEPCIÓN DE MENSAJES ---
-
+// --- MENSAJES ---
 client.on('message', (topic, message) => {
     const valorStr = message.toString();
     const valorNum = parseFloat(valorStr);
@@ -387,7 +371,7 @@ client.on('message', (topic, message) => {
             updateChart(bigChartAltitud, valorNum);
         }
     }
-
+    
     // TEMPERATURA
     if (topic === 'satela/temp') {
         logData.temp = valorStr;
@@ -415,8 +399,18 @@ client.on('message', (topic, message) => {
 
     // ESTADO DE MISIÓN (Texto)
     if (topic === 'satela/estado') {
-        // Solo actualizamos el texto visualmente. NO GUARDAMOS NADA.
+        // Actualizamos el texto
         if(estadoText) estadoText.innerText = valorStr;
+
+        // SEGURIDAD: Si el mensaje ES "Desconectado", forzamos LED Rojo
+        if (valorStr.toLowerCase() === "desconectado") {
+            estadoWidget.classList.add('disconnected');
+            estadoWidget.classList.remove('connected');
+        } else {
+            // Si es cualquier otro mensaje ("Ascenso", "Caida"), aseguramos Verde
+            estadoWidget.classList.add('connected');
+            estadoWidget.classList.remove('disconnected');
+        }
     }
 
     // VELOCIDAD
