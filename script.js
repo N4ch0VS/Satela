@@ -1,7 +1,7 @@
 // ==========================================
 // 1. GESTIÓN DE MEMORIA (Solo Telemetría)
 // ==========================================
-// Borramos cualquier rastro de "estado" para evitar datos viejos
+// Limpiamos cualquier rastro de "estado" para que no persista al recargar
 let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     altitud: Array(15).fill(null),
     velocidad: Array(15).fill(null),
@@ -10,7 +10,8 @@ let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     humedad: "--"
 };
 
-// Limpieza de seguridad: Si por error se guardó el estado, lo borramos.
+// LIMPIEZA DE SEGURIDAD:
+// Si por error se guardó el estado antes, lo borramos de la memoria ahora mismo.
 if (logData.estado) {
     delete logData.estado;
     localStorage.setItem('satela_registry', JSON.stringify(logData));
@@ -25,25 +26,24 @@ function guardarEnMemoria() {
 // ==========================================
 function showToast(message, type) {
     const container = document.getElementById('toastContainer');
-    if (!container) return; // Si no existe el contenedor en HTML, no hace nada
+    if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`; // 'success' (verde) o 'error' (rojo)
-    
+    toast.className = `toast ${type}`;
     const icon = type === 'success' ? '✔' : '✖';
     toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
 
     container.appendChild(toast);
 
-    // Desaparecer automáticamente a los 4 segundos
+    // Desaparece a los 3 segundos
     setTimeout(() => {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 500);
-    }, 4000);
+    }, 3000);
 }
 
 // ==========================================
-// 3. DATOS DEL EQUIPO
+// 3. DATOS DEL EQUIPO Y UI
 // ==========================================
 const teamMembers = [
     { 
@@ -93,26 +93,20 @@ if(container) {
     });
 }
 
-// ==========================================
-// 4. INTERFAZ (Tabs, Popups, Tema)
-// ==========================================
+// Navegación
 function switchTab(tabName, event) {
     if(event) event.preventDefault();
     document.getElementById('view-datos').style.display = tabName === 'datos' ? 'block' : 'none';
     document.getElementById('view-cansat').style.display = tabName === 'cansat' ? 'block' : 'none';
-    
     const links = document.querySelectorAll('.nav-link');
     links.forEach(link => link.classList.remove('active'));
     if(event) event.target.classList.add('active');
-
     const navbar = document.getElementById('mainNavbar');
-    if (tabName === 'cansat') {
-        navbar.classList.add('navy-nav');
-    } else {
-        navbar.classList.remove('navy-nav');
-    }
+    if (tabName === 'cansat') navbar.classList.add('navy-nav');
+    else navbar.classList.remove('navy-nav');
 }
 
+// Popup
 const popupBg = document.getElementById("popupBg");
 const popupImg = document.getElementById("popupImg");
 const popupTitle = document.getElementById("popupTitle");
@@ -127,16 +121,14 @@ function openPopup(index) {
     popupText.textContent = member.text;
     popupEmail.textContent = member.email;
     popupEmail.href = "mailto:" + member.email;
-    if (member.banner) {
-        popupBanner.style.backgroundImage = `url(${member.banner})`;
-    } else {
-        popupBanner.style.backgroundImage = 'linear-gradient(to right, #001a33, #004e92)';
-    }
+    if (member.banner) popupBanner.style.backgroundImage = `url(${member.banner})`;
+    else popupBanner.style.backgroundImage = 'linear-gradient(to right, #001a33, #004e92)';
     popupBg.style.display = "flex";
 }
 function closePopup() { if(popupBg) popupBg.style.display = "none"; }
 if(popupBg) popupBg.onclick = (e) => { if (e.target === popupBg) closePopup(); };
 
+// Tema
 function toggleTheme(event) {
     if(event) { event.preventDefault(); event.stopPropagation(); }
     document.body.classList.toggle('dark-mode');
@@ -145,7 +137,7 @@ function toggleTheme(event) {
 }
 
 // ==========================================
-// 5. GRÁFICOS
+// 4. GRÁFICOS (Chart.js)
 // ==========================================
 const chartConfig = {
     type: 'line',
@@ -170,6 +162,7 @@ const chartConfig = {
 
 let chartAltitud, chartVelocidad, bigChartAltitud, bigChartVelocidad;
 
+// Inicializar Gráficos Pequeños
 if(document.getElementById('chartAltitud')) {
     chartAltitud = new Chart(document.getElementById('chartAltitud').getContext('2d'), {
         ...chartConfig,
@@ -201,7 +194,7 @@ if(document.getElementById('chartVelocidad')) {
     });
 }
 
-// Gráficos Modal
+// Inicializar Gráficos Grandes
 const bigChartConfig = JSON.parse(JSON.stringify(chartConfig)); 
 bigChartConfig.options.scales.x.display = true; 
 bigChartConfig.options.scales.y.grid.color = 'rgba(100, 100, 100, 0.2)';
@@ -239,7 +232,7 @@ if(document.getElementById('bigChartVelocidad')) {
     });
 }
 
-// Control Modal
+// Modal Control
 const chartModalBg = document.getElementById('chartModalBg');
 const canvasBigAlt = document.getElementById('bigChartAltitud');
 const canvasBigVel = document.getElementById('bigChartVelocidad');
@@ -272,39 +265,59 @@ function updateChart(chart, value) {
     chart.update();
 }
 
-
 // ==========================================
-// 6. CARGA INICIAL
+// 5. LÓGICA DE CONEXIÓN (WATCHDOG)
 // ==========================================
 const estadoWidget = document.getElementById('widget-estado');
 const estadoText = document.getElementById('Estado');
+let connectionTimeout = null; // Variable para el temporizador
 
-// Control Visual del Estado (LED + Texto)
+// Función Visual (Solo cambia colores)
 function setConnectionStatus(isConnected) {
     if(!estadoWidget || !estadoText) return;
 
     if (isConnected) {
-        // Lógica de seguridad: Solo ponemos verde si el texto NO dice "Desconectado"
-        // O forzamos el texto a "Conectado" para que coincida.
+        // ACTIVO (VERDE)
         estadoWidget.classList.add('connected');
         estadoWidget.classList.remove('disconnected');
         
-        // Si decía "Desconectado", lo cambiamos para que no haya contradicción
+        // Si el texto decía "Desconectado", lo actualizamos a "Conectado"
         if (estadoText.innerText === "Desconectado") {
             estadoText.innerText = "Conectado";
         }
     } else {
-        // Si se corta, ponemos Rojo Y cambiamos el texto
+        // INACTIVO (ROJO)
         estadoWidget.classList.add('disconnected');
         estadoWidget.classList.remove('connected');
         estadoText.innerText = "Desconectado";
     }
 }
 
+// Función que se llama cada vez que llega UN DATO
+function signalActivity() {
+    // 1. Ponemos Verde
+    setConnectionStatus(true);
+
+    // 2. Reiniciamos el temporizador de desconexión
+    if (connectionTimeout) clearTimeout(connectionTimeout);
+
+    // 3. Si pasan 5 segundos sin datos, se pone rojo automáticamente
+    connectionTimeout = setTimeout(() => {
+        setConnectionStatus(false);
+        showToast("Señal perdida (Tiempo de espera)", "error");
+    }, 5000); // 5000ms = 5 segundos
+}
+
+// ==========================================
+// 6. MQTT Y CARGA INICIAL
+// ==========================================
+
+// Carga Inicial
 window.onload = () => {
+    // Tema
     if (localStorage.getItem('dark-theme') === 'true') document.body.classList.add('dark-mode');
     
-    // Cargar datos
+    // Cargar datos numéricos (NO ESTADO)
     if(document.getElementById('dato-temp')) document.getElementById('dato-temp').innerText = logData.temp + " °C";
     if(document.getElementById('dato-presion')) document.getElementById('dato-presion').innerText = logData.presion;
     if(document.getElementById('dato-humedad')) document.getElementById('dato-humedad').innerText = logData.humedad + " %";
@@ -314,49 +327,31 @@ window.onload = () => {
     if(document.getElementById('dato-altitud')) document.getElementById('dato-altitud').innerText = (lastAlt !== null ? lastAlt : "--") + " m";
     if(document.getElementById('dato-velocidad')) document.getElementById('dato-velocidad').innerText = (lastVel !== null ? lastVel : "--");
 
-    // AL INICIAR: Siempre empezamos en Rojo / Desconectado
+    // IMPORTANTE: Empezamos siempre desconectados
     setConnectionStatus(false);
 };
 
-
-// ==========================================
-// 7. MQTT (LÓGICA BLINDADA)
-// ==========================================
+// Conexión MQTT
 const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
-console.log("Iniciando conexión MQTT..."); 
-
 const client = mqtt.connect(brokerUrl);
 
-// --- CONEXIÓN ESTABLECIDA ---
 client.on('connect', () => {
-    console.log(">> Conectado a HiveMQ");
-    
-    // 1. Ponemos LED Verde
-    setConnectionStatus(true);
-    // 2. Notificación
-    showToast("Conexión Establecida", "success");
-
+    console.log(">> Conectado al Broker (Esperando datos...)");
+    // NOTA: No ponemos setConnectionStatus(true) aquí. 
+    // Solo mostramos notificación de que tenemos internet.
+    showToast("Conectado al Broker MQTT", "success");
     client.subscribe('satela/#');
 });
 
-// --- CONEXIÓN PERDIDA ---
 client.on('offline', () => {
-    console.log(">> Offline");
-    
-    // 1. Ponemos LED Rojo Y Texto "Desconectado"
     setConnectionStatus(false);
-    // 2. Notificación
-    showToast("Conexión Perdida", "error");
+    showToast("Sin conexión a internet", "error");
 });
 
-client.on('error', (err) => {
-    console.error("Error:", err);
-    setConnectionStatus(false);
-    showToast("Error de Conexión", "error");
-});
-
-// --- MENSAJES ---
 client.on('message', (topic, message) => {
+    // ¡LLEGÓ UN MENSAJE! Esto confirma que el cohete está vivo.
+    signalActivity(); 
+
     const valorStr = message.toString();
     const valorNum = parseFloat(valorStr);
 
@@ -371,16 +366,12 @@ client.on('message', (topic, message) => {
             updateChart(bigChartAltitud, valorNum);
         }
     }
-    
+
     // TEMPERATURA
     if (topic === 'satela/temp') {
         logData.temp = valorStr;
         guardarEnMemoria();
-        const el = document.getElementById('dato-temp');
-        if(el) {
-            el.innerText = valorStr + " °C";
-            el.style.color = valorNum > 40 ? '#ff4444' : ''; 
-        }
+        document.getElementById('dato-temp').innerText = valorStr + " °C";
     }
 
     // PRESIÓN
@@ -397,19 +388,13 @@ client.on('message', (topic, message) => {
         document.getElementById('dato-humedad').innerText = valorStr + " %";
     }
 
-    // ESTADO DE MISIÓN (Texto)
+    // ESTADO (Mensaje de texto del cohete)
     if (topic === 'satela/estado') {
-        // Actualizamos el texto
         if(estadoText) estadoText.innerText = valorStr;
-
-        // SEGURIDAD: Si el mensaje ES "Desconectado", forzamos LED Rojo
-        if (valorStr.toLowerCase() === "desconectado") {
-            estadoWidget.classList.add('disconnected');
-            estadoWidget.classList.remove('connected');
-        } else {
-            // Si es cualquier otro mensaje ("Ascenso", "Caida"), aseguramos Verde
-            estadoWidget.classList.add('connected');
-            estadoWidget.classList.remove('disconnected');
+        // Si el cohete manda explícitamente "Desconectado", forzamos rojo
+        if(valorStr.toLowerCase() === "desconectado") {
+            setConnectionStatus(false);
+            if(connectionTimeout) clearTimeout(connectionTimeout); // Cancelamos el timer
         }
     }
 
