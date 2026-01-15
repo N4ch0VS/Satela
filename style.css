@@ -97,6 +97,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: border-color 0.3s ease; /* Transición suave para el borde de estado */
 }
 
 .widget-header { 
@@ -183,11 +184,38 @@ body {
 .team-card {
     background: white; border-radius: 8px; overflow: hidden;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease; border: 1px solid #eef2f5; cursor: pointer;
+    transition: transform 0.3s ease, border-color 0.3s ease; /* Transiciones mejoradas */
+    border: 1px solid #eef2f5; cursor: pointer;
 }
 .team-card:hover { transform: translateY(-5px); border-color: var(--accent-blue); }
-.team-card img { width: 100%; height: 200px; object-fit: cover; object-position: top; }
 .team-card h3 { margin: 12px 0; font-size: 1rem; color: var(--navy-blue); font-weight: 700; text-align: center; }
+
+/* --- ANIMACIONES SUAVES IMÁGENES --- */
+.team-card img { 
+    width: 100%; 
+    height: 200px; 
+    object-fit: cover; 
+    object-position: top;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), filter 0.6s ease;
+}
+
+.team-card:hover img {
+    transform: scale(1.05); /* Zoom suave al pasar el mouse */
+    filter: brightness(1.1);
+}
+
+/* Entrada suave general */
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /*POP UP equipo*/
 .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 26, 51, 0.85); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
@@ -202,7 +230,6 @@ body {
 .popup-contact { background: #f8f9fa; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent-blue); text-align: left; }
 .popup-contact .label { display: block; font-size: 0.7rem; font-weight: bold; color: #999; margin-bottom: 3px; }
 .email-link { color: #333; font-weight: 600; text-decoration: none; font-size: 1rem; }
-/* Perdon que esta todo pegado*/
 
 .footer { margin-top: 40px; padding-top: 20px; padding-bottom: 20px; border-top: 1px solid #eee; display: flex; justify-content: space-between; color: #777; font-size: 0.85rem;}
 
@@ -225,6 +252,50 @@ body {
     background-color: #000;
     color: #fff !important; 
 }
+
+/* --- ANIMACIONES DE ESTADO (Punto Verde/Rojo) --- */
+.status-dot {
+    height: 12px;
+    width: 12px;
+    background-color: #ccc; /* Gris por defecto */
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 10px;
+    transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Estado: CONECTADO */
+.widget.connected {
+    border-color: rgba(40, 167, 69, 0.5); /* Borde verde suave */
+}
+.widget.connected .status-dot {
+    background-color: #28a745;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.6);
+    animation: pulse-green 2s infinite;
+}
+
+/* Estado: DESCONECTADO */
+.widget.disconnected {
+    border-color: rgba(220, 53, 69, 0.3);
+}
+.widget.disconnected .status-dot {
+    background-color: #dc3545;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+    animation: pulse-red 3s infinite;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { box-shadow: 0 0 10px 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@keyframes pulse-red {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
 /*MODO OSCURO*/
 body.dark-mode {
     background-color: #121212; 
@@ -370,7 +441,7 @@ canvas {
 body.dark-mode .widget-header span:last-child {
     color: #ccc !important;
 }
-/*   Graficos modal*/
+/* Graficos modal*/
 .chart-modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.9); /* Fondo más oscuro para resaltar los datos */

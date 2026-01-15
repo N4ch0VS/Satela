@@ -1,4 +1,6 @@
-// logdata es para guardar los datos en la web y guarda 15 datos para los graficos
+// ==========================================
+// 1. GESTIÓN DE MEMORIA (Datos Guardados)
+// ==========================================
 let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     altitud: Array(15).fill(null),
     velocidad: Array(15).fill(null),
@@ -6,45 +8,48 @@ let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     presion: "--",
     humedad: "--"
 };
+
 function guardarEnMemoria() {
     localStorage.setItem('satela_registry', JSON.stringify(logData));
 }
 
-//contacto
+// ==========================================
+// 2. DATOS DEL EQUIPO
+// ==========================================
 const teamMembers = [
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Sofia.jpg", 
         title: "Sofía Rojas", 
-        text: ".", 
+        text: "Especialista en comunicaciones.", 
         email: "sg.rojas@alumno.etec.um.edu.ar",
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Nacho.jpg", 
         title: "Juan Ignacio Calderón", 
-        text: ".", 
+        text: "Diseño estructural.", 
         email: "jil.calderon@alumno.etec.um.edu.ar" 
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png", 
         title: "Gastón García", 
-        text: ".", 
+        text: "Software y sistemas.", 
         email: "gal.garcia@alumno.etec.um.edu.ar" 
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Santy.jpg", 
         title: "Santiago Juárez", 
-        text: ".", 
+        text: "Analista de datos.", 
         email: "sc.juarez@alumno.etec.um.edu.ar" 
     },
     { 
         img: "https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png", 
         title: "Agustín Cerroni", 
-        text: ".", 
+        text: "Logística y recuperación.", 
         email: "a.cerroni@alumno.etec.um.edu.ar" 
     }
 ];
 
-//Pop up
+// Generar tarjetas
 const container = document.getElementById("team-container");
 if(container) {
     teamMembers.forEach((member, index) => {
@@ -60,7 +65,11 @@ if(container) {
     });
 }
 
-// Menu Superior
+// ==========================================
+// 3. INTERFAZ (Tabs, Popups, Tema)
+// ==========================================
+
+// Tabs
 function switchTab(tabName, event) {
     if(event) event.preventDefault();
     document.getElementById('view-datos').style.display = tabName === 'datos' ? 'block' : 'none';
@@ -78,7 +87,7 @@ function switchTab(tabName, event) {
     }
 }
 
-// Popup
+// Popup Equipo
 const popupBg = document.getElementById("popupBg");
 const popupImg = document.getElementById("popupImg");
 const popupTitle = document.getElementById("popupTitle");
@@ -101,10 +110,7 @@ function openPopup(index) {
     }
     popupBg.style.display = "flex";
 }
-//cerrar popup
-function closePopup() {
-    popupBg.style.display = "none";
-}
+function closePopup() { popupBg.style.display = "none"; }
 if(popupBg) popupBg.onclick = (e) => { if (e.target === popupBg) closePopup(); };
 
 // Modo Oscuro
@@ -117,7 +123,10 @@ function toggleTheme(event) {
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('dark-theme', isDark);
 }
-//Graficos con chart
+
+// ==========================================
+// 4. GRÁFICOS (Chart.js)
+// ==========================================
 const chartConfig = {
     type: 'line',
     options: {
@@ -139,9 +148,9 @@ const chartConfig = {
     }
 };
 
-// poner los graficos con los datos guardados
 let chartAltitud, chartVelocidad;
-//altitud
+
+// Inicializar gráficos pequeños
 if(document.getElementById('chartAltitud')) {
     const ctxAlt = document.getElementById('chartAltitud').getContext('2d');
     chartAltitud = new Chart(ctxAlt, {
@@ -149,7 +158,7 @@ if(document.getElementById('chartAltitud')) {
         data: {
             labels: Array(15).fill(''),
             datasets: [{
-                data: [...logData.altitud], 
+                data: [...logData.altitud],
                 borderColor: '#007bff',
                 backgroundColor: 'rgba(0, 123, 255, 0.1)',
                 fill: true
@@ -157,7 +166,7 @@ if(document.getElementById('chartAltitud')) {
         }
     });
 }
-//velocidad
+
 if(document.getElementById('chartVelocidad')) {
     const ctxVel = document.getElementById('chartVelocidad').getContext('2d');
     chartVelocidad = new Chart(ctxVel, {
@@ -174,7 +183,7 @@ if(document.getElementById('chartVelocidad')) {
     });
 }
 
-// Gráficos Grandes
+// Inicializar Gráficos Grandes
 const bigChartConfig = JSON.parse(JSON.stringify(chartConfig)); 
 bigChartConfig.options.scales.x.display = true; 
 bigChartConfig.options.scales.y.grid.color = 'rgba(100, 100, 100, 0.2)';
@@ -189,7 +198,7 @@ if(document.getElementById('bigChartAltitud')) {
             labels: Array(15).fill(''),
             datasets: [{
                 label: 'Altitud (m)',
-                data: [...logData.altitud], 
+                data: [...logData.altitud],
                 borderColor: '#007bff',
                 backgroundColor: 'rgba(0, 123, 255, 0.2)',
                 fill: true,
@@ -217,12 +226,12 @@ if(document.getElementById('bigChartVelocidad')) {
     });
 }
 
-
+// Modal Gráficos
 const chartModalBg = document.getElementById('chartModalBg');
 const canvasBigAlt = document.getElementById('bigChartAltitud');
 const canvasBigVel = document.getElementById('bigChartVelocidad');
 const chartModalTitle = document.getElementById('chartModalTitle');
-//abir graficos
+
 function openChartModal(type) {
     if(!chartModalBg) return;
     chartModalBg.style.display = 'flex';
@@ -239,7 +248,6 @@ function openChartModal(type) {
 function closeChartModal() { if(chartModalBg) chartModalBg.style.display = 'none'; }
 if(chartModalBg) chartModalBg.onclick = (e) => { if(e.target === chartModalBg) closeChartModal(); }
 
-// Actualizar graficos con cada dato
 function updateChart(chart, value) {
     if(!chart) return;
     const data = chart.data.datasets[0].data;
@@ -251,51 +259,98 @@ function updateChart(chart, value) {
     chart.update();
 }
 
-//cargar datos 
+// ==========================================
+// 5. CARGA INICIAL (OnLoad)
+// ==========================================
 window.onload = () => {
+    // Cargar Tema
+    if (localStorage.getItem('dark-theme') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+    // Cargar Textos Guardados
     if(document.getElementById('dato-temp')) document.getElementById('dato-temp').innerText = logData.temp + " °C";
     if(document.getElementById('dato-presion')) document.getElementById('dato-presion').innerText = logData.presion;
     if(document.getElementById('dato-humedad')) document.getElementById('dato-humedad').innerText = logData.humedad + " %";
     
-    // Para altitud y velocidad mostar dato en orden
+    // Cargar últimos datos de gráficos en el texto
     const lastAlt = logData.altitud[14]; 
     const lastVel = logData.velocidad[14];
     
     if(document.getElementById('dato-altitud')) document.getElementById('dato-altitud').innerText = (lastAlt !== null ? lastAlt : "--") + " m";
     if(document.getElementById('dato-velocidad')) document.getElementById('dato-velocidad').innerText = (lastVel !== null ? lastVel : "--");
+
+    // Estado inicial: Desconectado
+    setConnectionStatus(false);
 };
 
-//MQTT 
+// ==========================================
+// 6. MQTT Y ESTADO DE CONEXIÓN
+// ==========================================
+
+// Referencias UI Estado
+const estadoWidget = document.getElementById('widget-estado');
+const estadoText = document.getElementById('Estado');
+
+// Función visual de conexión
+function setConnectionStatus(isConnected) {
+    if (isConnected) {
+        if(estadoWidget) {
+            estadoWidget.classList.add('connected');
+            estadoWidget.classList.remove('disconnected');
+        }
+        if(estadoText && estadoText.innerText === "Desconectado") {
+            estadoText.innerText = "En Linea"; 
+        }
+    } else {
+        if(estadoWidget) {
+            estadoWidget.classList.add('disconnected');
+            estadoWidget.classList.remove('connected');
+        }
+        if(estadoText) estadoText.innerText = "Desconectado";
+    }
+}
+
+// Conexión HiveMQ
 const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
 console.log("Conectando a hivemq..."); 
 const client = mqtt.connect(brokerUrl);
 
+// Eventos de Conexión
 client.on('connect', () => {
     console.log(">> Conectado a HiveMQ");
+    setConnectionStatus(true); // LUZ VERDE
     client.subscribe('satela/#');
 });
 
+client.on('offline', () => {
+    console.log(">> Offline");
+    setConnectionStatus(false); // LUZ ROJA
+});
+
+client.on('close', () => {
+    setConnectionStatus(false);
+});
+
+// Recepción de Mensajes
 client.on('message', (topic, message) => {
     const valorStr = message.toString();
     const valorNum = parseFloat(valorStr);
 
-    //  ALTITUD 
+    // ALTITUD
     if (topic === 'satela/altitud') {
         document.getElementById('dato-altitud').innerText = valorStr + " m";
         if(!isNaN(valorNum)) {
-            // Guardar
             logData.altitud.push(valorNum);
             if(logData.altitud.length > 15) logData.altitud.shift(); 
             guardarEnMemoria();
             updateChart(chartAltitud, valorNum);
-            updateChart(bigChartAltitud, valorNum);//Actualizar los dos graficos
+            updateChart(bigChartAltitud, valorNum);
         }
     }
-    
 
-    //  TEMPERATURA 
+    // TEMPERATURA
     if (topic === 'satela/temp') {
-        logData.temp = valorStr; // Guardar
+        logData.temp = valorStr;
         guardarEnMemoria();
         const el = document.getElementById('dato-temp');
         if(el) {
@@ -304,24 +359,26 @@ client.on('message', (topic, message) => {
         }
     }
 
-    //  PRESIÓN 
+    // PRESIÓN
     if (topic === 'satela/presion') {
-        logData.presion = valorStr; 
+        logData.presion = valorStr;
         guardarEnMemoria();
         document.getElementById('dato-presion').innerText = valorStr;
     }
 
-    //  HUMEDAD 
+    // HUMEDAD
     if (topic === 'satela/humedad') {
-        logData.humedad = valorStr; 
+        logData.humedad = valorStr;
+        guardarEnMemoria();
         document.getElementById('dato-humedad').innerText = valorStr + " %";
     }
 
+    // ESTADO (Texto personalizado desde el CanSat)
     if (topic === 'satela/estado') {
-        document.getElementById('Estado').innerText = valorStr ;
-        
-        }
-    //  VELOCIDAD 
+        if(estadoText) estadoText.innerText = valorStr;
+    }
+
+    // VELOCIDAD
     if (topic === 'satela/velocidad') {
         document.getElementById('dato-velocidad').innerText = valorStr;
         if(!isNaN(valorNum)) {
@@ -333,7 +390,3 @@ client.on('message', (topic, message) => {
         }
     }
 });
-/*¿Por que uso Hivemq?
- bueno es por que sino necesito algo que reciba el dato y lo devuelva algo como node-red,n8n
- o un servidor de python el problema es que dependan de que el archivo se ejecuta en alguna compu
- en cambio a si solo necesitamos algun microcontrolador que envie el dato por wifi */

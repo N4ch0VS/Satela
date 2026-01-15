@@ -15,7 +15,7 @@
     <header class="navbar" id="mainNavbar">
         <div class="logo-area">
             <div class="img-placeholder">
-                <img src="https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png" alt="Logo"> /*Logo*/
+                <img src="https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png" alt="Logo">
             </div>
             <span class="brand-name">Satela</span>
         </div>
@@ -57,6 +57,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="column-center">
                     <div class="widget video-widget">
                         <div class="widget-header"><span>Video</span></div>
@@ -64,11 +65,13 @@
                             <iframe src="" frameborder="0"></iframe>
                         </div>
                     </div>
-                    <div class="widget">
-                        <div class="widget-header"><span>Estado:</span></div>
-                     <div class="estado">
-                         <span id="Estado" class="Estado">Desconectado</span>
-                     </div>
+                    
+                    <div class="widget" id="widget-estado">
+                        <div class="widget-header"><span>ESTADO DE MISIÓN</span></div>
+                        <div class="data-row">
+                            <div class="status-dot"></div> 
+                            <span id="Estado" class="sensor-value" style="font-size: 1.5rem;">Desconectado</span>
+                        </div>
                     </div>
                 </div>
 
@@ -81,7 +84,7 @@
                     </div>
                     
                     <div class="widget">
-                        <div class="widget-header"><span>GPS CORDENADAS</span></div>
+                        <div class="widget-header"><span>GPS COORDENADAS</span></div>
                         <div class="gps-box">
                             <div class="coords-text">
                                 <p>No disponible</p>
@@ -107,7 +110,7 @@
             <div class="section-hero">
                 <div class="hero-overlay">
                     <h2>EQUIPO CANSAT</h2>
-                    <p>Somos un equipo que nos apasiona encontrar soluciones a todo tipo de problema e inovar </p>
+                    <p>Somos un equipo que nos apasiona encontrar soluciones a todo tipo de problema e innovar </p>
                 </div>
             </div>
             <div class="team-grid" id="team-container"></div>
@@ -136,20 +139,20 @@
             </div>
         </div>
     </div>
+
     <div class="chart-modal-overlay" id="chartModalBg">
       <div class="chart-modal-card">
          <button class="close-chart-btn" onclick="closeChartModal()">×</button>
          <h2 id="chartModalTitle">TELEMETRÍA</h2>
-          <div class="large-chart-box">
+         <div class="large-chart-box">
              <canvas id="bigChartAltitud"></canvas>
              <canvas id="bigChartVelocidad"></canvas>
          </div>
       </div>
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="script.js"></script>
-    <!--el primer y segundo scripts son las librerias que hacen que reciba datos por mqtt y generar graficos,  despues el tercer script
-    es para ponerlos en los widgets y botones, van en ese orden por que si se invierten la libreria no carga -->
 </body>
 </html>
