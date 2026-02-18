@@ -1,4 +1,4 @@
-// Guardar en log data
+// Cargar datos guardados o inicializar valores por defecto
 let logData = JSON.parse(localStorage.getItem('satela_registry')) || {
     altitud: Array(15).fill(null),
     velocidad: Array(15).fill(null),
@@ -11,10 +11,12 @@ if (logData.estado) {
     localStorage.setItem('satela_registry', JSON.stringify(logData));
 }
 
+// Guardar datos en localStorage
 function guardarEnMemoria() {
     localStorage.setItem('satela_registry', JSON.stringify(logData));
 }
-//notificaciones de estado
+
+// Mostrar notificacion toast
 function showToast(message, type) {
     const container = document.getElementById('toastContainer');
     if (!container) return;
@@ -33,9 +35,7 @@ function showToast(message, type) {
     }, 3000);
 }
 
- 
-// 3. DATOS DEL EQUIPO Y UI
- 
+// Datos del equipo
 const teamMembers = [
     { 
         img: "https://satela.qzz.io/Imagenes/Sofia.jpg", 
@@ -69,6 +69,7 @@ const teamMembers = [
     }
 ];
 
+// Generar tarjetas del equipo
 const container = document.getElementById("team-container");
 if(container) {
     teamMembers.forEach((member, index) => {
@@ -84,7 +85,7 @@ if(container) {
     });
 }
 
-// Navegación
+// Cambiar entre pestañas (Datos / Equipo)
 function switchTab(tabName, event) {
     if(event) event.preventDefault();
     document.getElementById('view-datos').style.display = tabName === 'datos' ? 'block' : 'none';
@@ -97,7 +98,7 @@ function switchTab(tabName, event) {
     else navbar.classList.remove('navy-nav');
 }
 
-// Popup equipo
+// Popup del equipo
 const popupBg = document.getElementById("popupBg");
 const popupImg = document.getElementById("popupImg");
 const popupTitle = document.getElementById("popupTitle");
@@ -105,6 +106,7 @@ const popupText = document.getElementById("popupText");
 const popupEmail = document.getElementById("popupEmail");
 const popupBanner = document.getElementById("popupBanner");
 
+// Abrir popup con datos del miembro
 function openPopup(index) {
     const member = teamMembers[index];
     popupImg.src = member.img;
@@ -116,18 +118,20 @@ function openPopup(index) {
     else popupBanner.style.backgroundImage = 'linear-gradient(to right, #001a33, #004e92)';
     popupBg.style.display = "flex";
 }
+
+// Cerrar popup
 function closePopup() { if(popupBg) popupBg.style.display = "none"; }
 if(popupBg) popupBg.onclick = (e) => { if (e.target === popupBg) closePopup(); };
 
-// Tema
+// Cambiar tema (oscuro / claro)
 function toggleTheme(event) {
     if(event) { event.preventDefault(); event.stopPropagation(); }
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('dark-theme', isDark);
 }
- 
-// Graficos
+
+// Configuracion base de graficos
 const chartConfig = {
     type: 'line',
     options: {
@@ -151,7 +155,7 @@ const chartConfig = {
 
 let chartAltitud, chartVelocidad, bigChartAltitud, bigChartVelocidad;
 
-// Iniciar Gráficos Pequeños
+// Iniciar grafico pequeño de altitud
 if(document.getElementById('chartAltitud')) {
     chartAltitud = new Chart(document.getElementById('chartAltitud').getContext('2d'), {
         ...chartConfig,
@@ -167,6 +171,8 @@ if(document.getElementById('chartAltitud')) {
         }
     });
 }
+
+// Iniciar grafico pequeño de velocidad
 if(document.getElementById('chartVelocidad')) {
     chartVelocidad = new Chart(document.getElementById('chartVelocidad').getContext('2d'), {
         ...chartConfig,
@@ -183,11 +189,12 @@ if(document.getElementById('chartVelocidad')) {
     });
 }
 
-// Iniciar Gráficos Grandes
+// Configuracion para graficos grandes (con eje X visible)
 const bigChartConfig = JSON.parse(JSON.stringify(chartConfig)); 
 bigChartConfig.options.scales.x.display = true; 
 bigChartConfig.options.scales.y.grid.color = 'rgba(100, 100, 100, 0.2)';
 
+// Iniciar grafico grande de altitud
 if(document.getElementById('bigChartAltitud')) {
     bigChartAltitud = new Chart(document.getElementById('bigChartAltitud').getContext('2d'), {
         ...bigChartConfig,
@@ -204,6 +211,8 @@ if(document.getElementById('bigChartAltitud')) {
         }
     });
 }
+
+// Iniciar grafico grande de velocidad
 if(document.getElementById('bigChartVelocidad')) {
     bigChartVelocidad = new Chart(document.getElementById('bigChartVelocidad').getContext('2d'), {
         ...bigChartConfig,
@@ -221,12 +230,13 @@ if(document.getElementById('bigChartVelocidad')) {
     });
 }
 
-// Modal Control
+// Control del modal de graficos
 const chartModalBg = document.getElementById('chartModalBg');
 const canvasBigAlt = document.getElementById('bigChartAltitud');
 const canvasBigVel = document.getElementById('bigChartVelocidad');
 const chartModalTitle = document.getElementById('chartModalTitle');
 
+// Abrir modal segun tipo de grafico
 function openChartModal(type) {
     if(!chartModalBg) return;
     chartModalBg.style.display = 'flex';
@@ -240,9 +250,12 @@ function openChartModal(type) {
         if(canvasBigVel) canvasBigVel.style.display = 'block';
     }
 }
+
+// Cerrar modal de graficos
 function closeChartModal() { if(chartModalBg) chartModalBg.style.display = 'none'; }
 if(chartModalBg) chartModalBg.onclick = (e) => { if(e.target === chartModalBg) closeChartModal(); }
 
+// Actualizar datos del grafico con nuevo valor
 function updateChart(chart, value) {
     if(!chart) return;
     const data = chart.data.datasets[0].data;
@@ -254,54 +267,46 @@ function updateChart(chart, value) {
     chart.update();
 }
 
- 
-// Estado 
- 
+// Estado de conexion
 const estadoWidget = document.getElementById('widget-estado');
 const estadoText = document.getElementById('Estado');
-let connectionTimeout = null; 
-//temporizador de estado
+let connectionTimeout = null;
 
-// Función Led de estado
+// Actualizar LED de estado (verde/rojo)
 function setConnectionStatus(isConnected) {
     if(!estadoWidget || !estadoText) return;
 
     if (isConnected) {
-        //VERDE
         estadoWidget.classList.add('connected');
         estadoWidget.classList.remove('disconnected');
         if (estadoText.innerText === "Desconectado") {
             estadoText.innerText = "Conectado";
         }
     } else {
-        // ROJO
         estadoWidget.classList.add('disconnected');
         estadoWidget.classList.remove('connected');
         estadoText.innerText = "Desconectado";
     }
 }
 
-// Función que se llama cada vez que llega UN DATO
+// Señalizar actividad (reinicia temporizador de desconexion)
 function signalActivity() {
-    // Poner verde
     setConnectionStatus(true);
-    // Reiniciar temporizador
     if (connectionTimeout) clearTimeout(connectionTimeout);
 
-    // Si pasan 5 segundos se pone rojo
+    // Si pasan 5 segundos sin datos, se marca como desconectado
     connectionTimeout = setTimeout(() => {
         setConnectionStatus(false);
         showToast("Señal perdida (Tiempo de espera)", "error");
-    }, 5000); 
-    //5 segundos
+    }, 5000);
     }
 
- 
-// MQTT 
+// Inicializacion al cargar la pagina
 window.onload = () => {
-    // Tema
+    // Aplicar tema guardado
     if (localStorage.getItem('dark-theme') === 'true') document.body.classList.add('dark-mode');
-    // Cargar datos 
+
+    // Cargar ultimos datos guardados
     if(document.getElementById('dato-temp')) document.getElementById('dato-temp').innerText = logData.temp + " °C";
     if(document.getElementById('dato-presion')) document.getElementById('dato-presion').innerText = logData.presion;
     if(document.getElementById('dato-humedad')) document.getElementById('dato-humedad').innerText = logData.humedad + " %";
@@ -313,28 +318,30 @@ window.onload = () => {
     setConnectionStatus(false);
 };
 
-// Conexión MQTT
+// Conexion MQTT al broker
 const brokerUrl = 'wss://broker.hivemq.com:8884/mqtt';
 const client = mqtt.connect(brokerUrl);
 
+// Al conectarse al broker
 client.on('connect', () => {
-    // Solo mostramos notificación de que esta conectado
     showToast("Conectado a MQTT", "success");
     client.subscribe('satela/#');
 });
 
+// Al perder conexion
 client.on('offline', () => {
     setConnectionStatus(false);
     showToast("Conexion perdida", "error");
 });
 
+// Procesar mensajes recibidos por topico
 client.on('message', (topic, message) => {
     signalActivity(); 
 
     const valorStr = message.toString();
     const valorNum = parseFloat(valorStr);
 
-    // ALTITUD
+    // Altitud
     if (topic === 'satela/altitud') {
         document.getElementById('dato-altitud').innerText = valorStr + " m";
         if(!isNaN(valorNum)) {
@@ -346,28 +353,28 @@ client.on('message', (topic, message) => {
         }
     }
 
-    // TEMPERATURA
+    // Temperatura
     if (topic === 'satela/temp') {
         logData.temp = valorStr;
         guardarEnMemoria();
         document.getElementById('dato-temp').innerText = valorStr + " °C";
     }
 
-    // PRESIÓN
+    // Presion
     if (topic === 'satela/presion') {
         logData.presion = valorStr;
         guardarEnMemoria();
         document.getElementById('dato-presion').innerText = valorStr;
     }
 
-    // HUMEDAD
+    // Humedad
     if (topic === 'satela/humedad') {
         logData.humedad = valorStr;
         guardarEnMemoria();
         document.getElementById('dato-humedad').innerText = valorStr + " %";
     }
 
-    // ESTADO
+    // Estado de mision
     if (topic === 'satela/estado') {
         if(estadoText) estadoText.innerText = valorStr;
         if(valorStr.toLowerCase() === "desconectado") {
@@ -376,7 +383,7 @@ client.on('message', (topic, message) => {
         }
     }
 
-    // VELOCIDAD
+    // Velocidad
     if (topic === 'satela/velocidad') {
         document.getElementById('dato-velocidad').innerText = valorStr;
         if(!isNaN(valorNum)) {

@@ -1,106 +1,239 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Satela - Cansat </title>
+    <title>Satela - CanSat</title>
+    <meta name="description"
+        content="Satela CanSat — Telemetría en tiempo real, datos de misión y equipo aeroespacial estudiantil.">
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <meta name="google-site-verification" content="9DOYXg2bRoR2yhm2BN8-LjLoZ0XblYQzYfHVk9GZY3M" />
 </head>
+
 <body>
 
-    <div class="side-triangle left-triangle"></div>
-    <div class="side-triangle right-triangle"></div>
+    <div class="stars-container" aria-hidden="true">
+        <div class="stars stars-sm"></div>
+        <div class="stars stars-md"></div>
+        <div class="stars stars-lg"></div>
+    </div>
+
+    <div class="ambient-orb orb-1" aria-hidden="true"></div>
+    <div class="ambient-orb orb-2" aria-hidden="true"></div>
 
     <header class="navbar" id="mainNavbar">
         <div class="logo-area">
             <div class="img-placeholder">
-                <img src="https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png" alt="Logo">
+                <img src="https://gato-gag253.github.io/Satela/Imagenes/Logo%20Satela.png" alt="Logo Satela">
             </div>
-            <span class="brand-name">Satela</span>
+            <span class="brand-name">SATELA</span>
+            <span class="brand-tag">CANSAT</span>
         </div>
-       
         <nav>
-            <a href="#" class="nav-link active" onclick="switchTab('datos', event)">DATOS</a>
-            <a href="#" class="nav-link" onclick="switchTab('cansat', event)">CANSAT</a>
-            <a href="javascript:void(0)" class="nav-link theme-btn" onclick="toggleTheme(event)">TEMA</a>
-        </nav> </header>
+            <a href="#" class="nav-link active" onclick="switchTab('datos', event)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18" />
+                    <path d="M7 16l4-8 4 4 4-6" />
+                </svg>
+                DATOS
+            </a>
+            <a href="#" class="nav-link" onclick="switchTab('cansat', event)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                EQUIPO
+            </a>
+            <a href="javascript:void(0)" class="nav-link theme-btn" onclick="toggleTheme(event)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+                TEMA
+            </a>
+        </nav>
+    </header>
 
     <div class="main-wrapper">
-        
+
         <main id="view-datos" class="tab-content">
-            <h1 class="main-title">CANSAT DATOS</h1>
-           
+            <div class="hero-title-section">
+                <h1 class="main-title">
+                    <span class="title-accent">CANSAT</span> DATOS
+                </h1>
+                <p class="subtitle">Telemetría CanSat en tiempo real</p>
+                <div class="title-line"></div>
+            </div>
+
             <div class="grid-layout">
                 <div class="column">
-                    <div class="widget" onclick="openChartModal('altitud')" style="cursor: pointer;">
+                    <div class="widget widget-chart" onclick="openChartModal('altitud')" style="cursor: pointer;">
                         <div class="widget-header">
-                            <span>ALTITUD (m)</span>
-                            <span id="dato-altitud" style="font-size: 0.8rem; color: #666;">-- m</span>
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 2L2 22h20L12 2z" />
+                                </svg>
+                                ALTITUD
+                            </span>
+                            <span id="dato-altitud" class="widget-value-sm">-- m</span>
                         </div>
                         <div class="iframe-container small-h" style="position: relative; height: 100px;">
                             <canvas id="chartAltitud"></canvas>
                         </div>
-                        <div style="text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 5px;">Ver mas</div>
+                        <div class="widget-expand-hint">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="15 3 21 3 21 9" />
+                                <polyline points="9 21 3 21 3 15" />
+                                <line x1="21" y1="3" x2="14" y2="10" />
+                                <line x1="3" y1="21" x2="10" y2="14" />
+                            </svg>
+                            Ver mas
+                        </div>
                     </div>
 
                     <div class="widget">
-                        <div class="widget-header"><span>TEMPERATURA (°C)</span></div>
+                        <div class="widget-header">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                                </svg>
+                                TEMPERATURA
+                            </span>
+                        </div>
                         <div class="data-row">
                             <span id="dato-temp" class="sensor-value">-- °C</span>
                         </div>
                     </div>
+
                     <div class="widget">
-                        <div class="widget-header"><span>PRESIÓN (hPa)</span></div>
+                        <div class="widget-header">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 6v6l4 2" />
+                                </svg>
+                                PRESIÓN
+                            </span>
+                        </div>
                         <div class="data-row">
                             <span id="dato-presion" class="sensor-value">--</span>
+                            <span class="sensor-unit">hPa</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="column-center">
                     <div class="widget video-widget">
-                        <div class="widget-header"><span>Video</span></div>
+                        <div class="widget-header">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polygon points="23 7 16 12 23 17 23 7" />
+                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                                </svg>
+                                Video EN VIVO
+                            </span>
+                        </div>
                         <div class="video-frame">
                             <iframe src="" frameborder="0"></iframe>
                         </div>
                     </div>
-                    
-                    <div class="widget" id="widget-estado">
-                        <div class="widget-header"><span>ESTADO DE MISIÓN</span></div>
+
+                    <div class="widget widget-status" id="widget-estado">
+                        <div class="widget-header">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                    <polyline points="22 4 12 14.01 9 11.01" />
+                                </svg>
+                                ESTADO DE MISIÓN
+                            </span>
+                        </div>
                         <div class="data-row">
-                            <div class="status-dot"></div> 
+                            <div class="status-dot"></div>
                             <span id="Estado" class="sensor-value" style="font-size: 1.5rem;">Desconectado</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="column">
+
+                    <div class="widget widget-chart" onclick="openChartModal('velocidad')" style="cursor: pointer;">
+                        <div class="widget-header">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                </svg>
+                                VELOCIDAD
+                            </span>
+                            <span id="dato-velocidad" class="widget-value-sm">--</span>
+                        </div>
+                        <div class="iframe-container small-h" style="position: relative; height: 100px;">
+                            <canvas id="chartVelocidad"></canvas>
+                        </div>
+                        <div class="widget-expand-hint">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="15 3 21 3 21 9" />
+                                <polyline points="9 21 3 21 3 15" />
+                                <line x1="21" y1="3" x2="14" y2="10" />
+                                <line x1="3" y1="21" x2="10" y2="14" />
+                            </svg>
+                            Ver mas
+                        </div>
+                    </div>
                     <div class="widget">
-                        <div class="widget-header"><span>HUMEDAD (%)</span></div>
+                        <div class="widget-header">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                                </svg>
+                                HUMEDAD
+                            </span>
+                        </div>
                         <div class="data-row">
                             <span id="dato-humedad" class="sensor-value">-- %</span>
                         </div>
                     </div>
-                    
+
                     <div class="widget">
-                        <div class="widget-header"><span>GPS COORDENADAS</span></div>
+                        <div class="widget-header">
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="10" r="3" />
+                                    <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z" />
+                                </svg>
+                                GPS COORDENADAS
+                            </span>
+                        </div>
                         <div class="gps-box">
                             <div class="coords-text">
                                 <p>No disponible</p>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="widget" onclick="openChartModal('velocidad')" style="cursor: pointer;">
-                            <div class="widget-header">
-                                <span>VELOCIDAD (m/s)</span>
-                                <span id="dato-velocidad" style="font-size: 0.8rem; color: #666;">--</span>
-                            </div>
-                            <div class="iframe-container small-h" style="position: relative; height: 100px;">
-                                <canvas id="chartVelocidad"></canvas>
-                            </div>
-                            <div style="text-align: center; font-size: 0.7rem; color: #aaa; margin-top: 5px;">Ver mas</div>
                     </div>
                 </div>
             </div>
@@ -109,16 +242,43 @@
         <main id="view-cansat" class="tab-content" style="display: none;">
             <div class="section-hero">
                 <div class="hero-overlay">
-                    <h2>EQUIPO CANSAT</h2>
-                    <p>Somos un equipo que nos apasiona encontrar soluciones a todo tipo de problema e innovar </p>
+
+                    <h2>NUESTRO EQUIPO</h2>
+                    <p>Somos un equipo que nos apasiona encontrar soluciones a todo tipo de problema e innovar</p>
                 </div>
             </div>
             <div class="team-grid" id="team-container"></div>
+
+            <div class="map-section">
+                <div class="map-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="10" r="3" />
+                        <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z" />
+                    </svg>
+                    <h3>Nos encontramos en</h3>
+                </div>
+                <div class="map-frame">
+                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3347.9572308100787!2d-68.85449502490269!3d-32.95213857216501!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x967e0b067323d179%3A0x2f6e98ec0645ef99!2sEscuela%20T%C3%A9cnica%20de%20la%20Universidad%20de%20Mendoza!5e0!3m2!1ses-419!2sar!4v1771385712846!5m2!1ses-419!2sar" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
         </main>
-          
+
         <footer class="footer">
-            <div class="email-contact">@gmail.com</div>
-            <div class="footer-logo">Satela</div>
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <span class="footer-logo">SATELA</span>
+                    <span class="footer-tagline">Misión CanSat</span>
+                </div>
+                <div class="email-contact">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    @gmail.com
+                </div>
+            </div>
+            <div class="footer-line"></div>
+            <div class="footer-copy">2026 Satela </div>
         </footer>
     </div>
 
@@ -141,19 +301,21 @@
     </div>
 
     <div class="chart-modal-overlay" id="chartModalBg">
-      <div class="chart-modal-card">
-         <button class="close-chart-btn" onclick="closeChartModal()">×</button>
-         <h2 id="chartModalTitle">TELEMETRÍA</h2>
-         <div class="large-chart-box">
-             <canvas id="bigChartAltitud"></canvas>
-             <canvas id="bigChartVelocidad"></canvas>
-         </div>
-      </div>
+        <div class="chart-modal-card">
+            <button class="close-chart-btn" onclick="closeChartModal()">×</button>
+            <h2 id="chartModalTitle">TELEMETRÍA</h2>
+            <div class="large-chart-box">
+                <canvas id="bigChartAltitud"></canvas>
+                <canvas id="bigChartVelocidad"></canvas>
+            </div>
+        </div>
     </div>
-    
+
     <div class="toast-container" id="toastContainer"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
